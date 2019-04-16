@@ -43,12 +43,21 @@ function showQuiz(category) {
 `
 const startBtn = document.querySelector('.start-quiz')
 startBtn.addEventListener('click', (event) => {
-
   questions()
   const submitBtn = document.createElement('button')
-  submitBtn
+  submitBtn.className = 'submit'
+  submitBtn.setAttribute("type","submit")
+  submitBtn.innerText = 'Submit Answers'
+  quizbox.append(submitBtn)
+  submitBtn.addEventListener('click', (e) => {
+    checkAnswers()
+    console.log(state.currentScore)
+  }
+  )
 })
 }
+
+
 
 // function quiz(category) {
 //   liEl = document.createElement('li')
@@ -84,5 +93,6 @@ state.selectedCategory.questions.map(function(e) {return `<li id='${e.id}'>
 }
 
 function checkAnswers() {
-
+  debugger
+console.log(form.test.value)
 }
