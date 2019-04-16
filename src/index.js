@@ -50,6 +50,7 @@ function showQuiz(category) {
 `;
   const startBtn = document.querySelector(".start-quiz");
   startBtn.addEventListener("click", event => {
+    newRound()
     getQuestion();
   });
 }
@@ -71,13 +72,48 @@ function renderCategories() {
 }
 
 function renderQuestion(question) {
-  debugger
-  // quizbox.innerHTML =
-  // `
-  //
-  // `
+
+  quizbox.innerHTML =
+  `
+  <p>${question.content}</p>
+  <form id="form${question.id}">
+  <input type="radio" name="test" value='correct'>   ${question.answer}<br>
+  <input type="radio" name="test" value='incorrect'> ${question.incorrect_1}<br>
+  </form>
+  `
 
 }
+
+function newRound() {
+
+  let text;
+  const player = prompt('Please Enter Your Name');
+  if (player == null || player == "") {
+    text = "Please enter a name"
+  } else {
+    text = `Hello ${player}`
+  }
+  debugger
+  createRound(player)
+
+}
+
+
+// post new player to api
+function createRound(player) {
+  return fetch('http://localhost:3000/rounds', {
+    method: 'POST',
+    headers:
+    {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({ playername: player })
+  })
+    .then(resp => resp.json())
+}
+
+
 
 
 
