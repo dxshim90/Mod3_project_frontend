@@ -14,38 +14,81 @@
   border-radius: 3em;
 }
 
-#dog-bar {
+#quiz-bar {
   height: 15vh;
-  background: skyblue;
+  background: red;
   display: flex;
   justify-content: space-around;
   align-items: center;
 }
 
-#dog-bar span {
+#quiz-bar span {
   height: 80%;
   width: 8vw;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 2em;
-  border: 1px solid blue;
+  border: 1px solid red;
 }
 
-#dog-summary-container {
-  height: 75vh;
-  text-align: center;
+#quiz-summary-container {
+  width: 600px;
+	height: 350px;
+  border: solid;
+	position: absolute;
+	top:0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+
+	margin: auto;
 }
 
-#dog-info {
+#quiz-info {
   display: flex;
   flex-flow: column;
   align-items: center;
 }
 
-#dog-info img {
+#quiz-info img {
   max-width: 75vw;
   max-height: 25vw;
+}
+
+.card {
+  object-fit: contain;
+  max-width:100%;
+  max-height:100%;
+  text-align: left;
+  border: grey solid 1px;
+  padding: 1rem;
+  width: 15rem;
+  height: 25rem;
+  display: inline-grid;
+  margin: 1rem 2rem;
+  box-shadow: 3px 4px #e04b52
+}
+
+.start-quiz {
+  height:20px;
+  width:100px;
+  margin: -20px -50px;
+  position:relative;
+  top:50%;
+  left:50%;
+}
+
+h1 {
+  height: 10em;
+   display: flex;
+   justify-content: center;
+}
+
+h2 {
+  justify-content: center;
+  height: 10em;
+ display: flex;
 }
 
 body {
