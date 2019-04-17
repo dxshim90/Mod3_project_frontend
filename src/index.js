@@ -11,7 +11,8 @@ const state = {
   selectedCategory: null,
   currentScore: 0,
   currentRound: null,
-  currentQuestion: null
+  currentQuestion: null,
+  answers: []
 };
 
 function getCategory() {
@@ -34,12 +35,30 @@ function addCategoryToBar(category) {
 }
 
 function getQuestion() {
-  let number = Math.floor(Math.random() * Math.floor(4));
+  let number = Math.floor(Math.random() * Math.floor(15));
   const newnumber = number + 1;
 
   return fetch(`http://localhost:3000/questions/${newnumber}`)
     .then(resp => resp.json())
-    .then(question => renderQuestion(question));
+    .then(question => {
+      // if (question.endOfRound) {
+      //   myEndRoundFunction()
+      // } else {
+      //   renderQuestion(question)
+      // }
+
+      if (state.answers.length > 8) {
+        endRound();
+      } else {
+        renderQuestion(question);
+      }
+    });
+}
+
+function endRound() {
+  quizbox.innerHTML = `<h2>End of Game. Select a category to restart the quiz.</h2>
+  `;
+  console.log("end of game");
 }
 
 function showQuiz(category) {
@@ -75,8 +94,12 @@ function renderQuestion(question) {
   quizbox.innerHTML = `
   <p>${question.content}</p>
   <form id="form">
-  <input type="radio" name="test" value='${question.answer}'>   ${question.answer}<br>
-  <input type="radio" name="test" value='${question.incorrect_1}'> ${question.incorrect_1}<br>
+  <input type="radio" name="test" value='${question.answer}'>   ${
+    question.answer
+  }<br>
+  <input type="radio" name="test" value='${question.incorrect_1}'> ${
+    question.incorrect_1
+  }<br>
   </form>
   `;
 
@@ -89,8 +112,15 @@ function renderQuestion(question) {
   submitBtn.addEventListener("click", event => {
     const providedAnswer = form.test.value;
     createAnswer(providedAnswer, question);
+    //newQuestion()
+    getQuestion();
   });
 }
+
+// function newQuestion() {
+//   getQuestion().then(question => renderQuestion(question))
+//   debugger
+// }
 
 function newRound() {
   let text;
@@ -100,25 +130,23 @@ function newRound() {
   } else {
     text = `Hello ${player}`;
   }
-  createRound(player)
+  createRound(player);
   //state.currentRound = Round.id
 }
 
 // post new player to api
 function createRound(player) {
-  debugger
   return fetch("http://localhost:3000/rounds", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json"
     },
-    body: JSON.stringify({ playername: player})
+    body: JSON.stringify({ playername: player })
   }).then(resp => resp.json());
 }
 
 function createAnswer(providedAnswer, question) {
-  debugger;
   return fetch("http://localhost:3000/answers", {
     method: "POST",
     headers: {
@@ -126,7 +154,9 @@ function createAnswer(providedAnswer, question) {
       Accept: "application/json"
     },
     body: JSON.stringify({ answer: providedAnswer, question_id: question.id })
-  }).then(resp => resp.json())
+  })
+    .then(resp => resp.json())
+    .then(resp => state.answers.push(resp.answer));
 }
 
 function checkAnswers() {
