@@ -9,7 +9,9 @@ const quizbox = document.querySelector("#quiz-summary-container");
 
 const state = {
   selectedCategory: null,
-  currentScore: 0
+  currentScore: 0,
+  currentRound: null,
+  currentQuestion: null
 };
 
 function getCategory() {
@@ -23,7 +25,7 @@ function addCategoryToBar(category) {
   divEl.innerHTML = `
 <p>${category.name} </p>
 <img src='${category.image_url}'/>
-`
+`;
   quizBar.appendChild(divEl);
   divEl.addEventListener("click", event => {
     state.selectedCategory = category;
@@ -31,16 +33,14 @@ function addCategoryToBar(category) {
   });
 }
 
-
 function getQuestion() {
-  let number = Math.floor(Math.random() * Math.floor(4))
-  const newnumber = number + 1
+  let number = Math.floor(Math.random() * Math.floor(4));
+  const newnumber = number + 1;
 
   return fetch(`http://localhost:3000/questions/${newnumber}`)
-  .then(resp => resp.json())
-  .then(question => renderQuestion(question))
+    .then(resp => resp.json())
+    .then(question => renderQuestion(question));
 }
-
 
 function showQuiz(category) {
   quizbox.innerHTML = `
@@ -50,7 +50,7 @@ function showQuiz(category) {
 `;
   const startBtn = document.querySelector(".start-quiz");
   startBtn.addEventListener("click", event => {
-    newRound()
+    newRound();
     getQuestion();
   });
 }
@@ -72,51 +72,67 @@ function renderCategories() {
 }
 
 function renderQuestion(question) {
-
-  quizbox.innerHTML =
-  `
+  quizbox.innerHTML = `
   <p>${question.content}</p>
-  <form id="form${question.id}">
-  <input type="radio" name="test" value='correct'>   ${question.answer}<br>
-  <input type="radio" name="test" value='incorrect'> ${question.incorrect_1}<br>
+  <form id="form">
+  <input type="radio" name="test" value='${question.answer}'>   ${question.answer}<br>
+  <input type="radio" name="test" value='${question.incorrect_1}'> ${question.incorrect_1}<br>
   </form>
-  `
+  `;
 
+  const submitBtn = document.createElement("button");
+  submitBtn.className = "submit";
+  submitBtn.setAttribute("type", "submit");
+  submitBtn.innerText = "Submit Answers";
+  quizbox.append(submitBtn);
+
+  submitBtn.addEventListener("click", event => {
+    const providedAnswer = form.test.value;
+    createAnswer(providedAnswer, question);
+  });
 }
 
 function newRound() {
-
   let text;
-  const player = prompt('Please Enter Your Name');
+  const player = prompt("Please Enter Your Name");
   if (player == null || player == "") {
-    text = "Please enter a name"
+    text = "Please enter a name";
   } else {
-    text = `Hello ${player}`
+    text = `Hello ${player}`;
   }
-  debugger
   createRound(player)
-
+  //state.currentRound = Round.id
 }
-
 
 // post new player to api
 function createRound(player) {
-  return fetch('http://localhost:3000/rounds', {
-    method: 'POST',
-    headers:
-    {
+  debugger
+  return fetch("http://localhost:3000/rounds", {
+    method: "POST",
+    headers: {
       "Content-Type": "application/json",
       Accept: "application/json"
     },
-    body: JSON.stringify({ playername: player })
-  })
-    .then(resp => resp.json())
+    body: JSON.stringify({ playername: player})
+  }).then(resp => resp.json());
 }
 
+function createAnswer(providedAnswer, question) {
+  debugger;
+  return fetch("http://localhost:3000/answers", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({ answer: providedAnswer, question_id: question.id })
+  }).then(resp => resp.json())
+}
 
-
-
-
+function checkAnswers() {
+  //debugger;
+  console.log(form.test.value);
+}
 
 //   quizbox.innerHTML = state.selectedCategory.questions
 //     .map(function(e) {
@@ -130,16 +146,6 @@ function createRound(player) {
 //   <br>`;
 //     })
 //     .join("");
-
-function checkAnswers() {
-  //debugger;
-  console.log(form.test.value);
-}
-
-
-
-
-
 
 // const submitBtn = document.createElement("button");
 // submitBtn.className = "submit";
