@@ -1,18 +1,22 @@
 document.addEventListener("DOMContentLoaded", function() {
   renderCategories();
+  renderScores()
 });
 
 //pull category from API
 const api = "http://localhost:3000/categories";
 const quizBar = document.getElementById("quiz-bar");
 const quizbox = document.querySelector("#quiz-summary-container");
+const leaderTable = document.querySelector("#table");
 
 const state = {
   selectedCategory: null,
   currentScore: 0,
   currentRound: null,
   currentQuestion: null,
-  answers: []
+  answers: [],
+  lives: 3,
+  currentUser: null
 };
 
 function getCategory() {
@@ -47,7 +51,7 @@ function getQuestion() {
       //   renderQuestion(question)
       // }
 
-      if (state.answers.length > 8) {
+      if (state.answers.length > 10) {
         endRound();
       } else {
         renderQuestion(question);
@@ -56,9 +60,15 @@ function getQuestion() {
 }
 
 function endRound() {
+  createUser()
   quizbox.innerHTML = `<h2>End of Game. Select a category to restart the quiz.</h2>
   `;
   console.log("end of game");
+  addScore(score)
+  state.currentUser = null
+  state.currentScore = 0
+  state.lives = 3
+
 }
 
 function showQuiz(category) {
@@ -94,13 +104,17 @@ function renderQuestion(question) {
   quizbox.innerHTML = `
   <p>${question.content}</p>
   <form id="form">
-  <input type="radio" name="test" value='${question.answer}'>   ${
+  <input type="radio" name="test" value='correct'>   ${
     question.answer
   }<br>
-  <input type="radio" name="test" value='${question.incorrect_1}'> ${
+  <input type="radio" name="test" value='incorrect'> ${
     question.incorrect_1
   }<br>
   </form>
+  <br><br><br><br><br>
+
+  <p>Current score: ${state.currentScore}</p>
+  <p>Current Lives: ${state.lives}</p>
   `;
 
   const submitBtn = document.createElement("button");
@@ -112,14 +126,22 @@ function renderQuestion(question) {
   submitBtn.addEventListener("click", event => {
     const providedAnswer = form.test.value;
     createAnswer(providedAnswer, question);
-    //newQuestion()
-    getQuestion();
+    if (providedAnswer === "incorrect") {
+      --state.lives
+    } else {
+      ++state.currentScore
+    }
+    if (state.lives === 0) {
+      endRound()
+    } else {
+      getQuestion()
+    }
+
   });
 }
 
 // function newQuestion() {
 //   getQuestion().then(question => renderQuestion(question))
-//   debugger
 // }
 
 function newRound() {
@@ -130,6 +152,7 @@ function newRound() {
   } else {
     text = `Hello ${player}`;
   }
+  state.currentUser = player
   createRound(player);
   //state.currentRound = Round.id
 }
@@ -159,10 +182,41 @@ function createAnswer(providedAnswer, question) {
     .then(resp => state.answers.push(resp.answer));
 }
 
+function createUser() {
+  return fetch("http://localhost:3000/scores", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({ name: state.currentUser, points: state.currentScore })
+  })
+    .then(resp => resp.json())
+}
+
+
 function checkAnswers() {
-  //debugger;
   console.log(form.test.value);
 }
+
+function addScore(score) {
+const li = document.createElement('li')
+li.innerHTML = `
+${score.name} Scored ${score.points}
+`
+leaderTable.append(li)
+}
+
+function getScores() {
+  return fetch('http://localhost:3000/scores')
+  .then(resp => resp.json())
+}
+
+function renderScores() {
+getScores().then(scores => scores.forEach(addScore));
+}
+
+
 
 //   quizbox.innerHTML = state.selectedCategory.questions
 //     .map(function(e) {
